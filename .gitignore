@@ -1,0 +1,11 @@
+# Jangan hantar fail berikut ke GitHub
+*.log
+*.env
+*.sql
+/vendor/
+/node_modules/
+.env
+.DS_Store
+.idea/
+*.bak
+*.zip
