@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update->bind_param("si", $hashed, $user_id);
             $update->execute();
 
-            echo "Kata laluan berjaya ditukar. <a href='login.php'>Log Masuk</a>";
+            echo "Kata laluan berjaya ditukar. <a href='index.php'>Log Masuk</a>";
         } else {
             echo "Kod tidak sah!";
         }
