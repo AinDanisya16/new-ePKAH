@@ -1,43 +1,111 @@
 <?php
 session_start();
-include("db.php"); // Pastikan fail db.php wujud dan betul
+include("db.php");
 
 if (!isset($_SESSION['user_id'])) {
-    die("Sila log masuk dahulu.");
+    die("❌ Sila log masuk terlebih dahulu untuk menghantar permintaan.");
 }
 
 // Ambil data dari borang
 $user_id = $_SESSION['user_id'];
-$kategori = $_POST['kategori'];
-$jenis = $_POST['jenis'];
-$poskod = $_POST['poskod'];
-$jajahan = $_POST['jajahan'];
-$negeri = $_POST['negeri'];
+$kategori = $_POST['kategori'] ?? '';
+$jenis = $_POST['jenis'] ?? '';
+$alamat = $_POST['alamat'] ?? '';
+$poskod = $_POST['poskod'] ?? '';
+$jajahan = $_POST['jajahan'] ?? '';
+$negeri = $_POST['negeri'] ?? '';
+$no_telefon = $_POST['No_Telefon_Untuk_Dihubungi'] ?? '';
 $nama_pelajar = $_POST['nama_pelajar'] ?? '';
 $nama_sekolah = $_POST['nama_sekolah'] ?? '';
 $kelas = $_POST['kelas'] ?? '';
 $cadangan_tarikh_kutipan = $_POST['cadangan_tarikh_kutipan'] ?? '';
 
-// Handle gambar upload
+// Validate semua wajib ada
+if (empty($kategori) || empty($jenis) || empty($alamat) || empty($poskod) || empty($jajahan) || empty($negeri)) {
+    die("❌ Sila lengkapkan semua maklumat wajib.");
+}
+
+// Uruskan muat naik gambar
 $targetDir = "uploads/";
 if (!file_exists($targetDir)) {
     mkdir($targetDir, 0777, true);
 }
 
-$gambar = $_FILES["gambar"]["name"];
-$targetFile = $targetDir . basename($gambar);
-move_uploaded_file($_FILES["gambar"]["tmp_name"], $targetFile);
+$gambar = $_FILES["gambar"]["name"] ?? '';
+if ($gambar) {
+    $targetFile = $targetDir . basename($gambar);
+    $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-// Masukkan ke database
-$stmt = $conn->prepare("INSERT INTO penghantaran (user_id, kategori, jenis, poskod, jajahan, negeri, gambar, nama_pelajar, nama_sekolah, kelas, cadangan_tarikh_kutipan, tarikh_hantar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+    // Validasi gambar
+    $check = getimagesize($_FILES["gambar"]["tmp_name"]);
+    if ($check === false) {
+        die("❌ Fail bukan gambar yang sah.");
+    }
 
-$stmt->bind_param("issssssssss", $user_id, $kategori, $jenis, $poskod, $jajahan, $negeri, $gambar, $nama_pelajar, $nama_sekolah, $kelas, $cadangan_tarikh_kutipan);
+    if ($_FILES["gambar"]["size"] > 2000000) {
+        die("❌ Gambar melebihi saiz maksimum 2MB.");
+    }
+
+    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+    if (!in_array($imageFileType, $allowedTypes)) {
+        die("❌ Hanya fail JPG, JPEG, PNG & GIF dibenarkan.");
+    }
+
+    if (!move_uploaded_file($_FILES["gambar"]["tmp_name"], $targetFile)) {
+        die("❌ Maaf, berlaku ralat semasa muat naik gambar.");
+    }
+} else {
+    $gambar = NULL; // Kalau tak upload gambar
+}
+
+// Masukkan data ke dalam jadual penghantaran
+$stmt = $conn->prepare("INSERT INTO penghantaran 
+(user_id, kategori, jenis, alamat, poskod, jajahan_daerah, negeri, no_telefon_untuk_dihubungi, gambar, nama_pelajar, nama_sekolah, kelas, cadangan_tarikh_kutipan, tarikh_hantar) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+
+$stmt->bind_param("issssssssssss", 
+    $user_id, $kategori, $jenis, $alamat, $poskod, $jajahan, $negeri, $no_telefon, $gambar, $nama_pelajar, $nama_sekolah, $kelas, $cadangan_tarikh_kutipan);
 
 if ($stmt->execute()) {
-    echo "Penghantaran berjaya dihantar!";
-    echo "<br><a href='pengguna_dashboard.php'>Kembali ke Dashboard</a>";
+
+    // ✅ Log aktiviti pengguna
+    $peranan = $_SESSION['peranan'] ?? 'pengguna';
+    $tindakan = "Menghantar borang penghantaran kategori $kategori ($jenis)";
+
+    $log_stmt = $conn->prepare("INSERT INTO aktiviti_log (user_id, peranan, tindakan) VALUES (?, ?, ?)");
+    $log_stmt->bind_param("iss", $user_id, $peranan, $tindakan);
+    $log_stmt->execute();
+    $log_stmt->close();
+
+    echo "
+    <div style='
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 20px;
+        margin: 50px auto;
+        width: 90%;
+        max-width: 600px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        font-size: 20px;
+    '>
+        ✅ Penghantaran anda telah berjaya dihantar!<br><br>
+        <a href='pengguna_penghantaran.php' style='
+            display: inline-block;
+            margin-top: 15px;
+            background-color: #43a047;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+        '>Lihat Penghantaran Saya</a>
+    </div>
+    ";
 } else {
-    echo "Ralat: " . $stmt->error;
+    echo "❌ Maaf, berlaku ralat: " . $stmt->error;
 }
 
 $stmt->close();

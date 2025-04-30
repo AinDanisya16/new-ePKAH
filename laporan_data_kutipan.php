@@ -12,11 +12,12 @@ if ($conn->connect_error) {
 
 $vendor_id = $_SESSION['user_id'];
 
-$sql = "SELECT p.*, u.nama AS nama_pengguna FROM penghantaran p 
+$sql = "SELECT k.*, p.*, u.nama AS nama_pengguna 
+        FROM kutipan_vendor k 
+        JOIN penghantaran p ON k.penghantaran_id = p.id 
         JOIN users u ON p.user_id = u.id
         WHERE p.vendor_id = ? 
-        ORDER BY p.id DESC";
-
+        ORDER BY k.id DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $vendor_id);
 $stmt->execute();
@@ -27,7 +28,7 @@ $result = $stmt->get_result();
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Senarai Penghantaran Vendor</title>
+    <title>Laporan Data Kutipan Vendor</title>
     <style>
         body { font-family: Arial, sans-serif; background: #e8f5e9; padding: 20px; }
         h2 { text-align: center; color: #2e7d32; }
@@ -37,27 +38,24 @@ $result = $stmt->get_result();
         td { background: #c8e6c9; }
         .menu { margin-top: 30px; text-align: center; }
         .menu a { padding: 10px 20px; background: #66bb6a; color: white; text-decoration: none; border-radius: 8px; margin: 0 5px; }
-        .btn-tambah { padding: 8px 15px; background-color: #43a047; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<h2>Senarai Penghantaran Diberikan kepada Anda</h2>
+<h2>Laporan Data Kutipan Vendor</h2>
 
 <table>
     <tr>
-        <th>ID</th>
+        <th>ID Kutipan</th>
         <th>Nama Pengguna</th>
-        <th>No Telefon Untuk Dihubungi</th>
+        <th>Telefon</th>
+        <th>Jajahan/Daerah</th>
         <th>Kategori</th>
         <th>Jenis</th>
-        <th>Alamat</th>
-        <th>Poskod</th>
-        <th>Jajahan/Daerah</th>
-        <th>Negeri</th>
-        <th>Tarikh Hantar</th>
-        <th>Status Kutipan</th>
-        <th>Tindakan</th>
+        <th>Item 3R</th>
+        <th>Berat (kg)</th>
+        <th>Nilai (RM)</th>
+        <th>Tarikh</th>
     </tr>
 
     <?php while ($row = $result->fetch_assoc()) { ?>
@@ -65,22 +63,22 @@ $result = $stmt->get_result();
         <td><?= $row['id'] ?></td>
         <td><?= htmlspecialchars($row['nama_pengguna']) ?></td>
         <td><?= htmlspecialchars($row['no_telefon_untuk_dihubungi']) ?></td>
+        <td><?= htmlspecialchars($row['jajahan_daerah']) ?></td>
         <td><?= htmlspecialchars($row['kategori']) ?></td>
         <td><?= htmlspecialchars($row['jenis']) ?></td>
-        <td><?= htmlspecialchars($row['alamat']) ?></td>
-        <td><?= htmlspecialchars($row['poskod']) ?></td>
-        <td><?= htmlspecialchars($row['jajahan_daerah']) ?></td>
-        <td><?= htmlspecialchars($row['negeri']) ?></td>
-        <td><?= $row['tarikh_hantar'] ?></td>
-        <td><?= $row['status_kutipan'] ?></td>
+        <td><?= $row['item_3r'] ? htmlspecialchars($row['item_3r']) : '-' ?></td>
         <td>
-            <?php if ($row['status_kutipan'] !== 'Selesai') { ?>
-            <form action="data_kutipan.php" method="post">
-                <input type="hidden" name="penghantaran_id" value="<?= $row['id'] ?>">
-                <button type="submit" class="btn-tambah">Tambah Kutipan</button>
-            </form>
-            <?php } else { echo "✅ Selesai"; } ?>
+            <?php
+                // Check if 'berat' is set and not NULL, then display it
+                if (isset($row['berat']) && !empty($row['berat'])) {
+                    echo htmlspecialchars($row['berat']) . " kg";
+                } else {
+                    echo "Tiada Data";
+                }
+            ?>
         </td>
+        <td>RM <?= number_format($row['nilai'], 2) ?></td>
+        <td><?= $row['tarikh_kutipan'] ?></td>
     </tr>
     <?php } ?>
 </table>

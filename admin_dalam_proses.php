@@ -6,15 +6,15 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Semak jika bukan vendor
-if (!isset($_SESSION['peranan']) || $_SESSION['peranan'] !== 'vendor') {
+// Semak jika bukan admin
+if (!isset($_SESSION['peranan']) || $_SESSION['peranan'] !== 'admin') {
     echo "Akses ditolak!";
     exit;
 }
 
 $sql = "SELECT p.*, u.nama FROM penghantaran p
         JOIN users u ON p.user_id = u.id
-        WHERE p.status_penghantaran = 'diterima vendor' 
+        WHERE p.status_penghantaran = 'diterima admin' 
         ORDER BY p.id DESC";
 $result = $conn->query($sql);
 ?>
@@ -47,16 +47,39 @@ $result = $conn->query($sql);
         .proses { background-color: orange; }
         .ditolak { background-color: red; }
         .selesai-nav { background-color: green; }
+
+        }
+         .menu {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .menu a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px; /* Kurangkan padding */
+            background-color: #a5d6a7;
+            text-decoration: none;
+            color: #1b5e20;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px; /* Kurangkan font size */
+            transition: background-color 0.3s ease;
+        }
+
+        .menu a:hover {
+            background-color: #81c784;
+        }
     </style>
 </head>
 <body>
-    <h2>Senarai Penghantaran Diterima Vendor (Dalam Proses)</h2>
+    <h2>Senarai Penghantaran Diterima Admin (Dalam Proses)</h2>
 
     <div style="margin-bottom: 20px;">
-        <a href="vendor_penghantaran.php" class="nav-btn semakan">📩 Dalam Semakan</a>
-        <a href="vendor_dalam_proses.php" class="nav-btn proses">📦 Dalam Proses</a>
-        <a href="vendor_ditolak.php" class="nav-btn ditolak">❌ Ditolak</a>
-        <a href="vendor_selesai.php" class="nav-btn selesai-nav">✅ Selesai</a>
+        <a href="admin_penghantaran.php" class="nav-btn semakan">📩 Dalam Semakan</a>
+        <a href="admin_dalam_proses.php" class="nav-btn proses">📦 Dalam Proses</a>
+        <a href="admin_ditolak.php" class="nav-btn ditolak">❌ Ditolak</a>
+        <a href="admin_selesai.php" class="nav-btn selesai-nav">✅ Selesai</a>
     </div>
 
     <table>
@@ -80,10 +103,16 @@ $result = $conn->query($sql);
             <td><?= $row['created_at'] ?></td>
             <td><?= $row['status_penghantaran'] ?></td>
             <td>
-                <a class="btn btn-tindakan" href="vendor_proses.php?id=<?= $row['id'] ?>&aksi=selesai">✅ Tandakan Selesai</a>
+                <a class="btn btn-tindakan" href="admin_proses.php?id=<?= $row['id'] ?>&aksi=selesai">✅ Tandakan Selesai</a>
             </td>
         </tr>
         <?php } ?>
     </table>
+
+     <div class="menu">
+    <a href="admin_dashboard.php">🏠 Kembali ke Dashboard</a>
+    <a href="logout.php">🚪 Log Keluar</a>
+    </div>
+    
 </body>
 </html>

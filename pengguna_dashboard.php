@@ -11,25 +11,54 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <title>Dashboard Pengguna</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        h2 { color: green; }
-        .menu { margin-top: 20px; }
+        body {
+            font-family: Consolas, monospace;
+            background: #f0fff0;
+            padding: 30px;
+            font-size: 20px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 120px;
+            height: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2e7d32;
+            font-size: 28px;
+        }
+
+        .menu {
+            margin-top: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .menu a {
             display: block;
-            padding: 10px;
-            margin: 5px 0;
-            width: 300px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background-color: #e8f5e9;
+            border: 2px solid #a5d6a7;
+            border-radius: 8px;
             text-decoration: none;
-            color: #000;
+            color: #1b5e20;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
         }
+
         .menu a:hover {
-            background-color: #d0ffd0;
+            background-color: #c8e6c9;
         }
     </style>
 </head>
 <body>
+
+    <img src="logo_epkah.png" alt="Logo ePKAH" class="logo">
 
     <h2>Selamat Datang ke Dashboard Pengguna</h2>
 
@@ -41,3 +70,4 @@ if (!isset($_SESSION['user_id'])) {
 
 </body>
 </html>
+
