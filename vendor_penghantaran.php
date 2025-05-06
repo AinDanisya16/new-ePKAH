@@ -40,6 +40,11 @@ $result = $stmt->get_result();
         .btn-tambah { padding: 8px 15px; background-color: #43a047; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
+
+<?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') { ?>
+    <p style="color: green; text-align:center;">Penghantaran berjaya dipadam.</p>
+<?php } ?>
+
 <body>
 
 <h2>Senarai Penghantaran Diberikan kepada Anda</h2>
@@ -74,13 +79,20 @@ $result = $stmt->get_result();
         <td><?= $row['tarikh_hantar'] ?></td>
         <td><?= $row['status_kutipan'] ?></td>
         <td>
-            <?php if ($row['status_kutipan'] !== 'Selesai') { ?>
-            <form action="data_kutipan.php" method="post">
-                <input type="hidden" name="penghantaran_id" value="<?= $row['id'] ?>">
-                <button type="submit" class="btn-tambah">Tambah Kutipan</button>
-            </form>
-            <?php } else { echo "✅ Selesai"; } ?>
+        <?php if ($row['status_kutipan'] !== 'Selesai') { ?>
+        <form action="data_kutipan.php" method="post">
+            <input type="hidden" name="penghantaran_id" value="<?= $row['id'] ?>">
+            <button type="submit" class="btn-tambah">Tambah Kutipan</button>
+        </form>
+        <?php } else { ?>
+        ✅ Selesai
+        <form action="padam_penghantaran.php" method="post" onsubmit="return confirm('Padam penghantaran ini?');">
+            <input type="hidden" name="penghantaran_id" value="<?= $row['id'] ?>">
+            <button type="submit" class="btn-tambah" style="background-color:#d32f2f;">🗑️ Padam</button>
+        </form>
+        <?php } ?>
         </td>
+        <td>
     </tr>
     <?php } ?>
 </table>

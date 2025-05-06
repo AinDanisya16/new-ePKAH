@@ -133,6 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             document.getElementById('vendor-fields').style.display = role === 'vendor' ? 'block' : 'none';
             document.getElementById('admin-field').style.display = role === 'admin' ? 'block' : 'none';
             document.getElementById('default-terms').style.display = (role === 'pengguna') ? 'block' : 'none';
+            document.getElementById('sekolah/agensi-terms').style.display = (role === 'sekolah/agensi') ? 'block' : 'none';
             document.getElementById('vendor-terms').style.display = (role === 'vendor') ? 'block' : 'none';
             document.getElementById('terms-label').style.display = (role !== 'admin') ? 'block' : 'none';
         }
@@ -147,6 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <select name="peranan" required onchange="toggleFields()">
             <option value="">--Pilih Peranan--</option>
             <option value="pengguna">Pengguna</option>
+            <option value="sekolah/agensi">Sekolah/Agensi</option>
             <option value="vendor">Vendor</option>
             <option value="admin">Admin</option>
         </select>
@@ -228,6 +230,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </ul>
         </div>
 
+        <div class="terms-box" id="sekolah/agensi-terms">
+            <strong>Terma & Syarat:</strong>
+            <ul>
+                <li>Barang yang dikutip perlu berada dalam keadaan bersih dan telah diasingkan mengikut kategori kitar semula.</li>
+                <li>Jika barang tidak memenuhi kriteria kebersihan dan pengasingan, pihak kami berhak untuk tidak mengambil barang tersebut bagi memastikan proses kitar semula berjalan dengan lancar dan efektif.</li>
+            </ul>
+        </div>
+
         <div class="terms-box" id="vendor-terms" style="display:none;">
             <strong>Terma & Syarat Vendor:</strong>
             <ul>
@@ -243,4 +253,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <button type="submit">Daftar</button>
     </form>
 </body>
-</html>
+</html> 

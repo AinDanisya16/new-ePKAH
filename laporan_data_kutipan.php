@@ -31,7 +31,7 @@ $result = $stmt->get_result();
     <title>Laporan Data Kutipan Vendor</title>
     <style>
         body { font-family: Arial, sans-serif; background: #e8f5e9; padding: 20px; }
-        h2 { text-align: center; color: #2e7d32; }
+        h2 { text-align: center; color: #2e7d32; margin-top: 40px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 10px; border: 1px solid #81c784; text-align: center; }
         th { background: #388e3c; color: white; }
@@ -48,7 +48,6 @@ $result = $stmt->get_result();
     <tr>
         <th>ID Kutipan</th>
         <th>Nama Pengguna</th>
-        <th>Telefon</th>
         <th>Jajahan/Daerah</th>
         <th>Kategori</th>
         <th>Jenis</th>
@@ -62,14 +61,12 @@ $result = $stmt->get_result();
     <tr>
         <td><?= $row['id'] ?></td>
         <td><?= htmlspecialchars($row['nama_pengguna']) ?></td>
-        <td><?= htmlspecialchars($row['no_telefon_untuk_dihubungi']) ?></td>
         <td><?= htmlspecialchars($row['jajahan_daerah']) ?></td>
         <td><?= htmlspecialchars($row['kategori']) ?></td>
         <td><?= htmlspecialchars($row['jenis']) ?></td>
         <td><?= $row['item_3r'] ? htmlspecialchars($row['item_3r']) : '-' ?></td>
         <td>
             <?php
-                // Check if 'berat' is set and not NULL, then display it
                 if (isset($row['berat']) && !empty($row['berat'])) {
                     echo htmlspecialchars($row['berat']) . " kg";
                 } else {
@@ -79,6 +76,36 @@ $result = $stmt->get_result();
         </td>
         <td>RM <?= number_format($row['nilai'], 2) ?></td>
         <td><?= $row['tarikh_kutipan'] ?></td>
+    </tr>
+    <?php } ?>
+</table>
+
+<?php
+// Dapatkan jumlah berat mengikut kategori dan item_3r
+$sqlJumlah = "SELECT p.kategori, k.item_3r, SUM(k.berat) AS jumlah_berat
+              FROM kutipan_vendor k
+              JOIN penghantaran p ON k.penghantaran_id = p.id
+              WHERE p.vendor_id = ?
+              GROUP BY p.kategori, k.item_3r
+              ORDER BY p.kategori, k.item_3r";
+$stmtJumlah = $conn->prepare($sqlJumlah);
+$stmtJumlah->bind_param("i", $vendor_id);
+$stmtJumlah->execute();
+$resultJumlah = $stmtJumlah->get_result();
+?>
+
+<h2>Jumlah Berat (kg) Mengikut Kategori & Item 3R</h2>
+<table>
+    <tr>
+        <th>Kategori</th>
+        <th>Item 3R</th>
+        <th>Jumlah Berat (kg)</th>
+    </tr>
+    <?php while ($rowJ = $resultJumlah->fetch_assoc()) { ?>
+    <tr>
+        <td><?= htmlspecialchars($rowJ['kategori']) ?></td>
+        <td><?= $rowJ['item_3r'] ? htmlspecialchars($rowJ['item_3r']) : '-' ?></td>
+        <td><?= number_format($rowJ['jumlah_berat'], 2) ?> kg</td>
     </tr>
     <?php } ?>
 </table>

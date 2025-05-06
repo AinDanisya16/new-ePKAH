@@ -1,42 +1,42 @@
 <?php
 session_start();
-if (!isset($_SESSION['peranan']) || $_SESSION['peranan'] !== 'vendor') {
-    echo "Akses ditolak!";
-    exit;
+include 'config.php';
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
 }
 
-$conn = new mysqli("localhost", "root", "", "ePKAH");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Add to cart
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_item'])) {
+    $kategori = $_POST['kategori'];
+    $berat = $_POST['berat'];
+    $nilai = $_POST['nilai'];
+
+    $_SESSION['cart'][] = [
+        'kategori' => $kategori,
+        'berat' => $berat,
+        'nilai' => $nilai
+    ];
 }
 
-$vendor_id = $_SESSION['user_id'];
+// Submit cart
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_cart'])) {
+    $vendor_id = $_SESSION['vendor_id'];
+    $nama_pengguna = $_SESSION['nama_pengguna'];
 
-// Get assigned delivery requests for this vendor
-$sql = "SELECT p.*, u.nama AS nama_pengguna FROM penghantaran p 
-        JOIN users u ON p.user_id = u.id
-        WHERE p.vendor_id = ? 
-        ORDER BY p.id DESC";
+    foreach ($_SESSION['cart'] as $item) {
+        $kategori = $item['kategori'];
+        $berat = $item['berat'];
+        $nilai = $item['nilai'];
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $vendor_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Handle kutipan confirmation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
-    $penghantaran_id = $_POST['penghantaran_id'];
-    $status_kutipan = 'Selesai';
-
-    // Update status kutipan to 'Selesai'
-    $update_sql = "UPDATE penghantaran SET status_kutipan = ? WHERE id = ?";
-    $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("si", $status_kutipan, $penghantaran_id);
-    if ($update_stmt->execute()) {
-        echo "Status kutipan telah dikemas kini!";
-    } else {
-        echo "Ralat mengemas kini status kutipan!";
+        $stmt = $conn->prepare("INSERT INTO kutipan (vendor_id, nama_pengguna, kategori, berat, nilai) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssd", $vendor_id, $nama_pengguna, $kategori, $berat, $nilai);
+        $stmt->execute();
+        $stmt->close();
     }
+
+    $_SESSION['cart'] = []; // Kosongkan cart ✅
+    $success = true; // Tunjuk message cute
 }
 ?>
 
@@ -44,94 +44,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Senarai Kutipan Vendor</title>
+    <title>Data Kutipan</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #e8f5e9;
-            padding: 25px;
-            font-size: 18px;
+            background-color: #eaffea;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding: 20px;
         }
-
-        h2 { text-align: center; color: #2e7d32; }
-
-        table {
-            border-collapse: collapse;
+        .container {
+            background: #f0fff0;
+            border: 2px solid #b2fab2;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 700px;
+            margin: auto;
+            box-shadow: 2px 2px 10px #c9eac9;
+        }
+        h1 {
+            color: #66bb6a;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, select, button {
             width: 100%;
-            margin-top: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        }
-
-        th, td {
             padding: 10px;
-            border: 1px solid #81c784;
-            text-align: center;
+            margin-top: 10px;
+            border: 1px solid #a5d6a7;
+            border-radius: 10px;
         }
-
-        th { background-color: #388e3c; color: white; }
-        td { background-color: #c8e6c9; }
-
-        .menu {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .menu a {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #66bb6a;
+        button {
+            background-color: #81c784;
             color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #66bb6a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #f9fff9;
+        }
+        th, td {
+            border: 1px solid #c8e6c9;
+            padding: 10px;
+            text-align: center;
+        }
+        .success-message {
+            background: #d0f0c0;
+            padding: 15px;
+            border: 2px solid #a5d6a7;
+            border-radius: 10px;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<h2>Senarai Penghantaran Diberikan kepada Anda</h2>
+<div class="container">
+    <h1>🌱 Data Kutipan Vendor 🌿</h1>
 
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Nama Pengguna</th>
-        <th>Alamat</th>
-        <th>Poskod</th>
-        <th>Jajahan/Daerah</th>
-        <th>Negeri</th>
-        <th>Tarikh</th>
-        <th>Status Kutipan</th>
-        <th>Tindakan</th>
-    </tr>
+    <?php if (!empty($success)): ?>
+        <div class="success-message">
+            ✅ Berjaya hantar kutipan! Terima kasih! 🥰
+        </div>
+    <?php endif; ?>
 
-    <?php while ($row = $result->fetch_assoc()) { ?>
-    <tr>
-        <td><?= $row['id'] ?></td>
-        <td><?= htmlspecialchars($row['nama_pengguna']) ?></td>
-        <td><?= htmlspecialchars($row['alamat']) ?></td>
-        <td><?= $row['poskod'] ?></td>
-        <td><?= $row['jajahan/daerah'] ?></td>
-        <td><?= $row['negeri'] ?></td>
-        <td><?= $row['created_at'] ?></td>
-        <td><?= $row['status_kutipan'] ?></td>
-        <td>
-            <?php if ($row['status_kutipan'] !== 'Selesai') { ?>
-            <form method="post">
-                <input type="hidden" name="penghantaran_id" value="<?= $row['id'] ?>">
-                <button type="submit" class="btn-sahkan">Sahkan Kutipan</button>
-            </form>
-            <?php } else { echo "✅ Selesai"; } ?>
-        </td>
-    </tr>
-    <?php } ?>
-</table>
+    <form method="post">
+        <label for="kategori">Kategori Sisa ♻️:</label>
+        <select id="kategori" name="kategori" required>
+            <option value="">-- Pilih Kategori --</option>
+            <option value="Minyak Masak Terpakai">Minyak Masak Terpakai 🛢️</option>
+            <option value="E-Waste">E-Waste 🖥️</option>
+            <option value="Plastik">Plastik 🛍️</option>
+            <option value="Besi/Tin">Besi/Tin ⚙️</option>
+            <option value="Tin Aluminium">Tin Aluminium 🥫</option>
+            <option value="Kotak">Kotak 📦</option>
+            <option value="Kertas">Kertas 📄</option>
+        </select>
 
-<div class="menu">
-    <a href="vendor_dashboard.php">🏠 Kembali ke Dashboard</a>
-    <a href="logout.php">🚪 Logout</a>
+        <label for="berat">Berat (kg) ⚖️:</label>
+        <input type="number" step="0.01" id="berat" name="berat" required>
+
+        <label for="nilai">Nilai (RM) 💵:</label>
+        <input type="number" step="0.01" id="nilai" name="nilai" required>
+
+        <button type="submit" name="add_item">Tambah ke Cart 🛒</button>
+    </form>
+
+    <?php if (!empty($_SESSION['cart'])): ?>
+        <h2>🛒 Cart Semasa</h2>
+        <table>
+            <tr>
+                <th>Kategori</th>
+                <th>Berat (kg)</th>
+                <th>Nilai (RM)</th>
+            </tr>
+            <?php foreach ($_SESSION['cart'] as $item): ?>
+                <tr>
+                    <td><?= htmlspecialchars($item['kategori']) ?></td>
+                    <td><?= htmlspecialchars($item['berat']) ?></td>
+                    <td><?= htmlspecialchars($item['nilai']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+
+        <form method="post">
+            <button type="submit" name="submit_cart">Hantar Kutipan 📤</button>
+        </form>
+    <?php endif; ?>
 </div>
 
 </body>

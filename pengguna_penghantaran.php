@@ -141,14 +141,6 @@ $result = $conn->query($query);
                 <th>No</th>
                 <th>Kategori</th>
                 <th>Jenis</th>
-                <th>Alamat</th>
-                <th>Poskod</th>
-                <th>Jajahan/Daerah</th>
-                <th>Negeri</th>
-                <th>No Telefon</th>
-                <th>Nama Pelajar</th>
-                <th>Nama Sekolah</th>
-                <th>Kelas</th>
                 <th>Tarikh Hantar</th>
                 <th>Status</th>
             </tr>
@@ -162,14 +154,6 @@ $result = $conn->query($query);
                     echo "<td>" . $no++ . "</td>";
                     echo "<td>" . htmlspecialchars($row['kategori']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['jenis']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['alamat']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['poskod']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['jajahan_daerah']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['negeri']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['no_telefon_untuk_dihubungi']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['nama_pelajar']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['nama_sekolah']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['kelas']) . "</td>";
                     echo "<td>" . date('d-m-Y', strtotime($row['tarikh_hantar'])) . "</td>";
                     echo "<td>" . htmlspecialchars($row['status_penghantaran']) . "</td>";
                     echo "</tr>";

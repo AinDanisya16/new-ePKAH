@@ -1,0 +1,59 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "ePKAH");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$email = $_GET['email'] ?? '';
+$sql = "SELECT * FROM users WHERE email = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+if (!$user || $user['peranan'] !== 'admin') {
+    echo "Akses tidak sah atau admin tidak dijumpai.";
+    exit;
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0fff0;
+            padding: 20px;
+        }
+        .profile-card {
+            max-width: 600px;
+            margin: auto;
+            background: #e8f5e9;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        h2 {
+            color: #2e7d32;
+            text-align: center;
+        }
+        p {
+            font-size: 18px;
+            color: #4e944f;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-card">
+        <h2>🛡️ Profil Admin</h2>
+        <p><strong>ID Kakitangan:</strong> <?= htmlspecialchars($user['id_kakitangan']) ?></p>
+        <p><strong>Nama:</strong> <?= htmlspecialchars($user['nama']) ?></p>
+        <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
+        <p><strong>No Telefon:</strong> <?= htmlspecialchars($user['telefon']) ?></p>
+    </div>
+</body>
+</html>
