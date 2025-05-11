@@ -95,7 +95,6 @@ $result = $conn->query($query);
     <h2>Selamat Datang, Admin <?php echo htmlspecialchars($_SESSION['nama']); ?>!</h2>
 
     <div class="menu">
-        <a href="profil_admin.php"> 👤 Profil Saya </a>
         <a href="senarai_pengguna.php">👥 Senarai Pengguna</a>
         <a href="senarai_vendor.php">🏭 Senarai Vendor</a>
         <a href="admin_penghantaran.php">📦 Senarai Penghantaran</a>

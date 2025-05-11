@@ -30,8 +30,8 @@ if ($id && in_array($aksi, ['terima', 'tolak', 'selesai'])) {
     $stmt->bind_param("si", $status_baru, $id);
 
     if ($stmt->execute()) {
-        // Redirect terus balik ke senarai admin_penghantaran.php
-        header("Location: admin_penghantaran.php?status=updated");
+        // Redirect terus balik ke senarai senarai_penghantaran.php
+        header("Location: senarai_penghantaran.php?status=updated");
         exit;
     } else {
         echo "Gagal kemaskini status.";
@@ -124,7 +124,7 @@ if ($id && in_array($aksi, ['terima', 'tolak', 'selesai'])) {
         </div>
 
         <div style="text-align: center;">
-            <a href="admin_penghantaran.php" class="button back-btn">Kembali ke Senarai Penghantaran</a>
+            <a href="senarai_penghantaran.php" class="button back-btn">Kembali ke Senarai Penghantaran</a>
         </div>
     </div>
 

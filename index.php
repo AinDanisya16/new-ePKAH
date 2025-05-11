@@ -7,15 +7,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Elak undefined variable warning
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $telefon = preg_replace('/[^0-9]/', '', $_POST['telefon']); // Hanya nombor sahaja
     $password = $_POST['password'];
-
-    // Debug: Paparkan nombor telefon yang dimasukkan
-    echo "Nombor telefon yang dimasukkan: " . $telefon;
 
     // Cari pengguna ikut no telefon
     $stmt = $conn->prepare("SELECT * FROM users WHERE telefon = ?");
@@ -23,31 +19,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Debug: Paparkan jumlah pengguna dijumpai
-    echo "Jumlah pengguna dijumpai: " . $result->num_rows;
-
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
 
         if (password_verify($password, $user['password'])) {
-            // Check user status before login
             if ($user['status'] == 'approved') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['nama'] = $user['nama'];
                 $_SESSION['peranan'] = strtolower($user['peranan']);
 
-                if ($_SESSION['peranan'] == 'admin') {
+                if ($_SESSION['peranan'] === 'sekolah/agensi') {
+                    $_SESSION['nama_sekolah'] = $user['nama'];
+                }
+
+                $peranan = $_SESSION['peranan'];
+
+                if ($peranan == 'admin') {
                     header("Location: admin_dashboard.php");
                     exit;
-                } elseif ($_SESSION['peranan'] == 'vendor') {
+                } elseif ($peranan == 'vendor') {
                     header("Location: vendor_dashboard.php");
                     exit;
-                } else {
+                } elseif ($peranan == 'pengguna') {
                     header("Location: pengguna_dashboard.php");
                     exit;
+                } elseif ($peranan == 'sekolah/agensi') {
+                    header("Location: sekolah_dashboard.php");
+                    exit;
+                } else {
+                    $error = "Peranan tidak dikenali.";
                 }
             } else {
-                $error = "Katalaluan salah.";
+                $error = "Akaun anda belum diluluskan.";
             }
         } else {
             $error = "Katalaluan salah.";
@@ -71,6 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-family: Consolas, sans-serif;
             background: #e8f5e9;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -136,9 +140,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-bottom: 15px;
             font-size: 18px;
         }
+
+        /* 🌟 Cute Home Button di luar kotak */
+        .home-link {
+            margin-top: 20px;
+            font-size: 20px;
+            text-decoration: none;
+            color: #1b5e20;
+            padding: 10px 18px;
+            border: 2px dashed #81c784;
+            border-radius: 12px;
+            background-color: #ffffffaa;
+            transition: all 0.3s ease;
+        }
+
+        .home-link:hover {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
+
     <div class="login-box">
         <img src="logo_epkah.png" alt="Logo ePKAH" class="logo-epkah">
         <h2>Log Masuk Pengguna</h2>
@@ -154,5 +179,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="signup.php">Daftar Akaun Baru</a>
         <a href="forgot_password.php">Lupa Kata Laluan?</a>
     </div>
+
+    <!-- Butang comel ke Home di luar kotak -->
+    <a class="home-link" href="home.php">🏠 Kembali ke Laman Utama</a>
+
 </body>
 </html>

@@ -143,7 +143,7 @@ td {
             echo "<td>" . $no++ . "</td>";
             echo "<td>" . htmlspecialchars($row['nama']) . "</td>";
             echo "<td>" . htmlspecialchars($row['telefon']) . "</td>";
-            echo "<td>" . ($row['kategori']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['kategori']) . "</td>";
             echo "<td>" . htmlspecialchars($row['jenis']) . "</td>";
             echo "<td>" . htmlspecialchars($row['alamat']) . "</td>";
             echo "<td>" . (isset($row['poskod']) ? htmlspecialchars($row['poskod']) : 'N/A') . "</td>";

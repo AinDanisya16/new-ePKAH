@@ -1,11 +1,32 @@
 <?php
 include 'db.php'; // sambung ke database
 
-// Query data kutipan
-$sql = "SELECT u.nama AS nama_pengguna, k.kategori, k.berat, k.nilai, k.tarikh_kutipan 
-        FROM kutipan_vendor k 
-        JOIN penghantaran p ON k.penghantaran_id = p.id 
-        JOIN users u ON p.user_id = u.id";
+// Menangani filter jika ada
+$kategori_filter = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+$berat_filter = isset($_GET['berat']) ? $_GET['berat'] : '';
+$nilai_filter = isset($_GET['nilai']) ? $_GET['nilai'] : '';
+$tarikh_filter = isset($_GET['tarikh']) ? $_GET['tarikh'] : '';
+
+// Query data kutipan dengan filter
+$sql = "SELECT u.nama AS nama_pengguna, dk.kategori, dk.berat_kg AS berat, dk.nilai_rm AS nilai, dk.tarikh_kutipan 
+        FROM data_kutipan dk
+        JOIN penghantaran p ON dk.penghantaran_id = p.id 
+        JOIN users u ON p.user_id = u.id
+        WHERE 1=1";
+
+// Menambah filter ke query jika ada
+if ($kategori_filter) {
+    $sql .= " AND dk.kategori = '$kategori_filter'";
+}
+if ($berat_filter) {
+    $sql .= " AND dk.berat_kg >= '$berat_filter'";
+}
+if ($nilai_filter) {
+    $sql .= " AND dk.nilai_rm >= '$nilai_filter'";
+}
+if ($tarikh_filter) {
+    $sql .= " AND dk.tarikh_kutipan >= '$tarikh_filter'";
+}
 
 $result = $conn->query($sql);
 ?>
@@ -13,7 +34,7 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>📊 Statistik Kutipan Vendor</title>
+    <title>📊 Statistik</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -64,21 +85,21 @@ $result = $conn->query($sql);
         }
 
         .back-button {
-    display: block;
-    width: 200px; /* tetapkan lebar untuk keseragaman */
-    margin: 30px auto; /* centrekan butang */
-    padding: 12px 25px;
-    background-color: #66bb6a;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 18px;
-    text-align: center; /* teks di tengah */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease;
-    
-    }
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 12px 25px;
+            background-color: #66bb6a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease;
+        }
+
         .back-button:hover {
             background-color: #58a05b;
         }
@@ -86,10 +107,52 @@ $result = $conn->query($sql);
         .emoji {
             margin-right: 6px;
         }
+
+        /* Styling untuk filter form */
+        .filter-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-form select,
+        .filter-form input {
+            padding: 8px;
+            margin: 5px;
+            font-size: 16px;
+        }
+
+        .filter-form button {
+            padding: 10px 20px;
+            background-color: #66bb6a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .filter-form button:hover {
+            background-color: #58a05b;
+        }
     </style>
 </head>
 <body>
-    <h2>📈 Statistik Kutipan Vendor 🌿</h2>
+    <h2>📈 Statistik 🌿</h2>
+
+    <!-- Filter Form -->
+    <div class="filter-form">
+        <form method="get">
+            <select name="kategori">
+                <option value="">Pilih Kategori</option>
+                <option value="UCO" <?= $kategori_filter == 'UCO' ? 'selected' : ''; ?>>UCO</option>
+                <option value="3R" <?= $kategori_filter == '3R' ? 'selected' : ''; ?>>3R</option>
+                <option value="E-waste" <?= $kategori_filter == 'E-waste' ? 'selected' : ''; ?>>E-waste</option>
+            </select>
+            <input type="number" name="berat" placeholder="Min Berat (kg)" value="<?= htmlspecialchars($berat_filter); ?>">
+            <input type="number" name="nilai" placeholder="Min Nilai (RM)" value="<?= htmlspecialchars($nilai_filter); ?>">
+            <input type="date" name="tarikh" value="<?= htmlspecialchars($tarikh_filter); ?>">
+            <button type="submit">🔍 Cari</button>
+        </form>
+    </div>
 
     <table>
         <tr>
@@ -108,21 +171,21 @@ $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 $tarikh = date("d/m/Y", strtotime($row['tarikh_kutipan']));
                 echo "<tr>";
-                echo "<td>{$row['nama_pengguna']}</td>";
-                echo "<td>{$row['kategori']}</td>";
-                echo "<td>{$row['berat']}</td>";
+                echo "<td>" . htmlspecialchars($row['nama_pengguna']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['kategori']) . "</td>";
+                echo "<td>" . number_format($row['berat'], 2) . "</td>";
                 echo "<td>RM " . number_format($row['nilai'], 2) . "</td>";
-                echo "<td>{$tarikh}</td>";
+                echo "<td>$tarikh</td>";
                 echo "</tr>";
 
                 $total_berat += $row['berat'];
                 $total_nilai += $row['nilai'];
             }
 
-            // Jumlah akhir
+            // Jumlah keseluruhan
             echo "<tr class='total-row'>";
             echo "<td colspan='2'>🔢 Jumlah Keseluruhan</td>";
-            echo "<td>{$total_berat}</td>";
+            echo "<td>" . number_format($total_berat, 2) . "</td>";
             echo "<td>RM " . number_format($total_nilai, 2) . "</td>";
             echo "<td>-</td>";
             echo "</tr>";

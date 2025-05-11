@@ -25,7 +25,7 @@ if (isset($_GET['approve'])) {
 }
 
 // Ambil pengguna sahaja
-$sql = "SELECT id, nama, telefon, peranan, status
+$sql = "SELECT id, nama, telefon, peranan, status, alamat, poskod
         FROM users
         WHERE peranan = 'pengguna'
         ORDER BY id DESC";
@@ -158,31 +158,36 @@ if (!$result) {
                 <th>Telefon</th>
                 <th>Peranan</th>
                 <th>Status</th>
+                <th>Alamat</th>
+                <th>Poskod</th>
                 <th>Tindakan</th>
             </tr>
         </thead>
         <tbody>
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['nama']) ?></td>
-                    <td><?= htmlspecialchars($row['telefon']) ?></td>
-                    <td><?= htmlspecialchars($row['peranan']) ?></td>
-                    <td><?= htmlspecialchars($row['status']) ?></td>
-                    <td>
-                        <?php if ($row['status'] === 'pending'): ?>
-                            <a class="btn btn-approve" href="?approve=<?= $row['id'] ?>">✅ Lulus</a>
-                            <a class="btn btn-reject" href="?reject=<?= $row['id'] ?>">❌ Tolak</a>
-                        <?php else: ?>
-                            <span class="no-action">Tiada tindakan</span>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr><td colspan="5">Tiada rekod pengguna.</td></tr>
-            <?php endif; ?>
-        </tbody>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?= htmlspecialchars($row['nama']) ?></td>
+                <td><?= htmlspecialchars($row['telefon']) ?></td>
+                <td><?= htmlspecialchars($row['peranan']) ?></td>
+                <td><?= htmlspecialchars($row['status']) ?></td>
+                <td><?= htmlspecialchars($row['alamat']) ?></td>
+                <td><?= htmlspecialchars($row['poskod']) ?></td>
+                <td>
+                    <?php if ($row['status'] === 'pending'): ?>
+                        <a class="btn btn-approve" href="?approve=<?= $row['id'] ?>">✅ Lulus</a>
+                        <a class="btn btn-reject" href="?reject=<?= $row['id'] ?>">❌ Tolak</a>
+                    <?php else: ?>
+                        <span class="no-action">Tiada tindakan</span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr><td colspan="7">Tiada rekod pengguna.</td></tr>
+        <?php endif; ?>
+    </tbody>
+
     </table>
 
     <div class="menu">

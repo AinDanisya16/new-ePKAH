@@ -14,18 +14,20 @@ if (isset($_POST['penghantaran_id']) && isset($_POST['kutipan'])) {
         $kategori = $conn->real_escape_string($item['kategori']);
         $berat = floatval($item['berat']);
         $nilai = floatval($item['nilai']);
-        $item_3r = isset($item['item']) ? $conn->real_escape_string($item['item']) : NULL;
+        $jenis = isset($item['item']) ? $conn->real_escape_string($item['item']) : '-';
+        $tarikh_kutipan = date("Y-m-d"); // hari ini
 
-        $sql = "INSERT INTO kutipan_vendor (penghantaran_id, kategori, berat, nilai, item_3r) 
-                VALUES ('$penghantaran_id', '$kategori', '$berat', '$nilai', " . ($item_3r ? "'$item_3r'" : "NULL") . ")";
+        $sql = "INSERT INTO data_kutipan (penghantaran_id, kategori, jenis, berat_kg, nilai_rm, tarikh_kutipan) 
+                VALUES (?, ?, ?, ?, ?, ?)";
 
-        if (!$conn->query($sql)) {
-            die("❌ Gagal simpan data: " . $conn->error);
-        }
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("issdds", $penghantaran_id, $kategori, $jenis, $berat, $nilai, $tarikh_kutipan);
+        $stmt->execute();
     }
 
-    echo "<script>alert('✅ Semua data kutipan berjaya disimpan!'); window.location.href='vendor_dashboard.php';</script>";
+    header("Location: laporan_data_kutipan.php");
+    exit();
 } else {
-    die("❌ Data tidak lengkap.");
+    echo "❌ Data tidak lengkap.";
 }
 ?>

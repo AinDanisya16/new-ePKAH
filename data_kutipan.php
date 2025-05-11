@@ -26,14 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
     die("❌ Data tidak lengkap.");
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
     <title>🌿 Tambah Data Kutipan Vendor</title>
     <style>
-        /* Styling your page here */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f0fdf4;
@@ -93,6 +91,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
             border-radius: 10px;
             color: #2e7d32;
         }
+        #senarai-kutipan ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        #senarai-kutipan li {
+            background: #e0f2f1;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #senarai-kutipan button {
+            background: #e53935;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        #senarai-kutipan button:hover {
+            background: #c62828;
+        }
     </style>
 
     <script>
@@ -103,6 +127,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
         document.getElementById('uco-fields').style.display = (kategori === 'UCO') ? 'block' : 'none';
         document.getElementById('ewaste-fields').style.display = (kategori === 'E-Waste') ? 'block' : 'none';
         document.getElementById('3r-fields').style.display = (kategori === '3R') ? 'block' : 'none';
+    }
+
+    function update3RFields() {
+        var item3R = document.getElementById('item_3r').value;
+        document.getElementById('3r-weight-value').style.display = (item3R !== '') ? 'block' : 'none';
     }
 
     function tambahKutipan() {
@@ -128,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
         kutipanList.push(data);
         renderKutipanList();
         document.getElementById('form-kutipan').reset();
-        updateForm();
+        updateForm(); 
     }
 
     function renderKutipanList() {
@@ -193,11 +222,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
         <div class="section">
             <label>👤 Nama Pengguna</label>
             <input type="text" value="<?= htmlspecialchars($penghantaran['nama_pengguna']) ?>" readonly>
+
             <label>📍 Alamat Penghantaran</label>
             <input type="text" value="<?= htmlspecialchars($penghantaran['alamat']) ?>" readonly>
-            <label>🌍 Jajahan/Daerah</label>
+
+            <label> 🌍 Jajahan/Daerah</label>
             <input type="text" value="<?= htmlspecialchars($penghantaran['jajahan_daerah']) ?>" readonly>
-            <label>📞 No Telefon Untuk Dihubungi</label>
+
+            <label> 📞 No Telefon Untuk Dihubungi</label>
             <input type="text" value="<?= htmlspecialchars($penghantaran['no_telefon_untuk_dihubungi']) ?>" readonly>
         </div>
 
@@ -220,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
 
         <div id="3r-fields" style="display:none;">
             <label>📋 Pilih Item 3R</label>
-            <select name="item_3r" id="item_3r">
+            <select name="item_3r" id="item_3r" onchange="update3RFields()">
                 <option value="">-- Sila Pilih --</option>
                 <option value="Plastik">Plastik</option>
                 <option value="Kertas">Kertas</option>
@@ -228,10 +260,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
                 <option value="Tin_Aluminiun">Tin Aluminium</option>
                 <option value="Besi">Besi</option>
             </select>
-            <label>⚖️ Berat (kg)</label>
-            <input type="number" step="0.01" name="berat_3r">
-            <label>💰 Nilai (RM)</label>
-            <input type="number" step="0.01" name="nilai_3r">
+
+            <div id="3r-weight-value" style="display:none;">
+                <label>⚖️ Berat (kg)</label>
+                <input type="number" step="0.01" name="berat_3r">
+                <label>💰 Nilai (RM)</label>
+                <input type="number" step="0.01" name="nilai_3r">
+            </div>
         </div>
 
         <div id="ewaste-fields" style="display:none;">

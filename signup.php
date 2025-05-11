@@ -4,11 +4,34 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fungsi jana ID mengikut peranan
+function generateUserID($role, $conn) {
+    $prefixes = [
+        'pengguna' => 'PE',
+        'sekolah/agensi' => 'SA',
+        'vendor' => 'VE',
+        'admin' => 'AD'
+    ];
+
+    $prefix = $prefixes[$role] ?? 'XX';
+
+    // Kira bilangan user untuk peranan tersebut
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE peranan = ?");
+    $stmt->bind_param("s", $role);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $count = (int)$row['total'] + 1;
+
+    return $prefix . str_pad($count, 3, '0', STR_PAD_LEFT);
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $peranan = $_POST['peranan'];
+    $id_pengguna = generateUserID($peranan, $conn); // ID dijana di sini
     $nama = $_POST['nama'];
     $email = $_POST['email'];
-    $telefon = filter_var(trim($_POST['telefon']), FILTER_SANITIZE_STRING); // Sanitize phone number
+    $telefon = filter_var(trim($_POST['telefon']), FILTER_SANITIZE_STRING);
     $alamat = $_POST['alamat'];
     $poskod = $_POST['poskod'];
     $jajahan = $_POST['jajahan'];
@@ -19,25 +42,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama_syarikat = $_POST['nama_syarikat'] ?? null;
     $no_syarikat = $_POST['no_syarikat'] ?? null;
     $lokasi_kutipan = $_POST['lokasi_kutipan'] ?? null;
-    $jenis_barang = isset($_POST['jenis_barang']) ? implode(", ", $_POST['jenis_barang']) : null; // Ubah sini
+    $jenis_barang = isset($_POST['jenis_barang']) ? implode(", ", $_POST['jenis_barang']) : null;
+    $status = 'approved';
 
-    $status = 'approved';  // Set status to 'approved' for vendors to bypass admin approval
-
-    // Prepared statement to prevent SQL injection
     $stmt = $conn->prepare("INSERT INTO users 
-        (nama, email, telefon, alamat, poskod, jajahan, negeri, peranan, password, nama_syarikat, no_syarikat, lokasi_kutipan, jenis_barang, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssssssssss", 
-        $nama, $email, $telefon, $alamat, $poskod, $jajahan, $negeri, $peranan, $password, 
+        (id_pengguna, nama, email, telefon, alamat, poskod, jajahan, negeri, peranan, password, nama_syarikat, no_syarikat, lokasi_kutipan, jenis_barang, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssssssssss", 
+        $id_pengguna, $nama, $email, $telefon, $alamat, $poskod, $jajahan, $negeri, $peranan, $password, 
         $nama_syarikat, $no_syarikat, $lokasi_kutipan, $jenis_barang, $status);
 
     if ($stmt->execute()) {
-    echo "<script>alert('Pendaftaran berjaya! Anda boleh log masuk sekarang.'); window.location.href='index.php';</script>";
-    exit;
+        echo "<script>alert('Pendaftaran berjaya! ID Pengguna anda: $id_pengguna'); window.location.href='index.php';</script>";
+        exit;
     } else {
-    echo "Ralat: " . $stmt->error;
+        echo "Ralat: " . $stmt->error;
     }
-
 
     $stmt->close();
     $conn->close();
@@ -49,101 +69,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Daftar Pengguna Baru</title>
-    <style>
-        body {
-            font-family: Arial, monospace;
-            background: #f0fff0;
-            padding: 20px;
-            font-size: 20px;
-        }
-        form {
-            max-width: 650px;
-            margin: auto;
-            padding: 25px;
-            background: #e8f5e9;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #2e7d32;
-            font-size: 24px;
-        }
-        label {
-            font-weight: bold;
-            color: #388e3c;
-            display: block;
-            margin-bottom: 6px;
-        }
-        input[type="text"], input[type="email"], input[type="password"], select {
-            width: 100%;
-            padding: 10px;
-            margin: 6px 0 18px;
-            border: 1px solid #a5d6a7;
-            border-radius: 6px;
-            font-size: 16px;
-            font-family: Arial, monospace;
-        }
-        button {
-            background-color: #43a047;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 22px;
-        }
-        button:hover {
-            background-color: #2e7d32;
-        }
-        .terms-box {
-            background: #f1f8e9;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #c5e1a5;
-            margin-bottom: 18px;
-        }
-        .terms-box ul {
-            padding-left: 20px;
-            margin-top: 10px;
-            color: #33691e;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            margin-top: 6px;
-            margin-bottom: 18px;
-        }
-        .checkbox-group label {
-            font-weight: normal;
-            color: #2e7d32;
-            margin-bottom: 8px;
-        }
-        .logo {
-            display: block;
-            margin: 0 auto 20px;
-            width: 90px;
-            height: auto;
-        }
-    </style>
-    <script>
-        function toggleFields() {
-            const role = document.querySelector('select[name="peranan"]').value;
-            document.getElementById('vendor-fields').style.display = role === 'vendor' ? 'block' : 'none';
-            document.getElementById('admin-field').style.display = role === 'admin' ? 'block' : 'none';
-            document.getElementById('default-terms').style.display = (role === 'pengguna') ? 'block' : 'none';
-            document.getElementById('sekolah/agensi-terms').style.display = (role === 'sekolah/agensi') ? 'block' : 'none';
-            document.getElementById('vendor-terms').style.display = (role === 'vendor') ? 'block' : 'none';
-            document.getElementById('terms-label').style.display = (role !== 'admin') ? 'block' : 'none';
-        }
-    </script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
     <img src="logo_epkah.png" alt="Logo ePKAH" class="logo">
     <h2>Daftar Akaun e-PKAH</h2>
     <form method="POST" action="" enctype="multipart/form-data">
-
         <label>Peranan:</label>
         <select name="peranan" required onchange="toggleFields()">
             <option value="">--Pilih Peranan--</option>
@@ -152,6 +84,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <option value="vendor">Vendor</option>
             <option value="admin">Admin</option>
         </select>
+
+        <div style="display:none;">
+            <label>ID Pengguna:</label>
+            <input type="text" id="generated-id" name="id_dummy" readonly>
+        </div>
 
         <label>Nama:</label>
         <input type="text" name="nama" required>
@@ -194,34 +131,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </select>
 
         <label>Katalaluan:</label>
-        <input type="password" name="password" required
-               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}"
-               title="Mesti ada sekurang-kurangnya 8 aksara, huruf besar, huruf kecil, nombor & simbol">
+        <div style="position: relative;">
+            <input type="password" name="password" id="passwordField" required
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}"
+                title="Mesti ada sekurang-kurangnya 8 aksara, huruf besar, huruf kecil, nombor & simbol"
+                style="width: 100%; padding-right: 40px;">
+            <span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
+        </div>
 
         <div id="vendor-fields" style="display:none;">
             <label>Nama Syarikat:</label>
             <input type="text" name="nama_syarikat">
+
             <label>No Syarikat:</label>
             <input type="text" name="no_syarikat">
-            <label>Lesen PBT:</label>
-            <input type="file" name="lesen_pbt">
-            <label>Lesen JAS:</label>
-            <input type="file" name="lesen_jas">
-            <label>Lesen SWCorp:</label>
-            <input type="file" name="lesen_swcorp">
-            <label>Lokasi Kutipan:</label>
+
+            <label>Lokasi Pengumpulan:</label>
             <input type="text" name="lokasi_kutipan">
-            
-            <label>Jenis Barang yang Dikutip:</label>
+
             <div class="checkbox-group">
-                <label><input type="checkbox" name="jenis_barang[]" value="Minyak Masak Terpakai (UCO)"> Minyak Masak Terpakai (UCO)</label>
-                <label><input type="checkbox" name="jenis_barang[]" value="Barangan Kitar Semula (3R)"> Barangan Kitar Semula (3R)</label>
-                <label><input type="checkbox" name="jenis_barang[]" value="Barang Elektrik & Elektronik (E-waste)"> Barang Elektrik & Elektronik (E-waste)</label>
-                <label><input type="checkbox" name="jenis_barang[]" value="Lain-lain"> Lain-lain</label>
+                <label>Jenis Barang:</label>
+                <label><input type="checkbox" name="jenis_barang[]" value="UCO"> Minyak Masak Terpakai (UCO)</label>
+                <label><input type="checkbox" name="jenis_barang[]" value="e-waste"> E-Waste</label>
+                <label><input type="checkbox" name="jenis_barang[]" value="plastic"> Plastik</label>
+                <label><input type="checkbox" name="jenis_barang[]" value="aluminum"> Aluminium</label>
+                <label><input type="checkbox" name="jenis_barang[]" value="kertas"> Kertas</label>
             </div>
         </div>
 
-        <div class="terms-box" id="default-terms">
+           <div class="terms-box" id="default-terms">
             <strong>Terma & Syarat:</strong>
             <ul>
                 <li>Barang yang dikutip perlu berada dalam keadaan bersih dan telah diasingkan mengikut kategori kitar semula.</li>
@@ -252,5 +190,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <button type="submit">Daftar</button>
     </form>
+
+    <nav>
+        <a href="index.php">➕ Login</a>
+    </nav>
+
 </body>
 </html> 

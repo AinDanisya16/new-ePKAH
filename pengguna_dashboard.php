@@ -63,7 +63,6 @@ if (!isset($_SESSION['user_id'])) {
     <h2>Selamat Datang ke Dashboard Pengguna</h2>
 
     <div class="menu">
-        <a href="profil.php"> 👤 Profil Saya</a>
         <a href="hantar_kitar_semula.php">➕ Hantar Kitar Semula</a>
         <a href="pengguna_penghantaran.php">📦 Lihat Penghantaran Saya</a>
         <a href="logout.php">🚪 Log Keluar</a>

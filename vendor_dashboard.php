@@ -89,7 +89,6 @@ if ($user['status'] !== 'approved') {
     <div class="dashboard-container">
         <h2>Selamat Datang Vendor: <?= $_SESSION['nama']; ?></h2>
 
-        <a href="profil_vendor.php"> 👤 Profil Saya</a><br>
         <a href="vendor_penghantaran.php">📦 Senarai Penghantaran Masuk</a><br>
         <a href="laporan_data_kutipan.php">📊 Laporan Data Kutipan</a><br>        
         <a href="logout.php">🚪 Logout</a>
