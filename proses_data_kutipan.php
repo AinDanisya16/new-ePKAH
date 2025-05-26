@@ -17,7 +17,7 @@ if (isset($_POST['penghantaran_id']) && isset($_POST['kutipan'])) {
         $jenis = isset($item['item']) ? $conn->real_escape_string($item['item']) : '-';
         $tarikh_kutipan = date("Y-m-d"); // hari ini
 
-        $sql = "INSERT INTO data_kutipan (penghantaran_id, kategori, jenis, berat_kg, nilai_rm, tarikh_kutipan) 
+        $sql = "INSERT INTO kutipan_vendor (penghantaran_id, kategori, jenis, berat_kg, nilai_rm, tarikh_kutipan) 
                 VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
