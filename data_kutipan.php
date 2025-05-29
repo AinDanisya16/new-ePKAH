@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
 
         var form = document.createElement('form');
         form.method = 'post';
-        form.action = 'proses_data_kutipan.php';
+        form.action = 'proses_data_kutipan.php'; // tukar ke proses simpan kutipan
 
         var penghantaran_id = document.createElement('input');
         penghantaran_id.type = 'hidden';
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
             for (const key in item) {
                 var input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = 'kutipan['+index+']['+key+']';
+                input.name = 'kutipan_vendor['+index+']['+key+']'; // nama array tukar jadi kutipan_vendor
                 input.value = item[key];
                 form.appendChild(input);
             }
@@ -276,15 +276,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'])) {
             <input type="number" step="0.01" name="nilai_ewaste">
         </div>
 
-        <button type="submit" class="button-submit">➕ Tambah ke Senarai</button>
+        <button type="submit" class="button-submit">➕ Tambah Kutipan</button>
     </form>
 
-    <div class="section" id="senarai-kutipan">
-        <!-- Senarai kutipan akan muncul di sini -->
-    </div>
+    <div id="senarai-kutipan" style="margin-top: 25px;"></div>
 
-    <button onclick="submitSemua()" class="button-submit" style="background:#43a047;">🚛 Hantar Semua Kutipan</button>
-
+    <button onclick="submitSemua()" class="button-submit">🚛 Hantar Semua Kutipan</button>
 </div>
 
 </body>
