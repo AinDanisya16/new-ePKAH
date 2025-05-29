@@ -163,8 +163,8 @@ require "db.php";
         <input type="text" name="poskod" required>
 
         <label>Jajahan/Daerah:</label>
-        <select name="jajahan" required>
-            <option value="">--Pilih Jajahan--</option>
+        <select name="jajahan_daerah" required>
+            <option value="">--Pilih Jajahan/Daerah--</option>
             <option>Bachok</option><option>Gua Musang</option><option>Jeli</option>
             <option>Kota Bharu</option><option>Kuala Krai</option><option>Machang</option>
             <option>Pasir Mas</option><option>Pasir Puteh</option><option>Tanah Merah</option>
