@@ -1,4 +1,5 @@
-<?php 
+<?php
+include 'includes/sidebar.php'; 
 session_start();
 $conn = new mysqli("localhost", "root", "", "ePKAH");
 
@@ -182,5 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Butang comel ke Home di luar kotak -->
     <a class="home-link" href="home.php">🏠 Kembali ke Laman Utama</a>
+
+<?php include 'includes/footer.php'; ?>
 
 </body>
