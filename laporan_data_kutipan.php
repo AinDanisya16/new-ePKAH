@@ -18,31 +18,39 @@ $tarikh_mula = $_GET['tarikh_mula'] ?? '';
 $tarikh_akhir = $_GET['tarikh_akhir'] ?? '';
 
 // Query asas
-$sql = "SELECT u.nama AS nama_pengguna, p.jajahan_daerah, dk.kategori, dk.jenis, dk.berat_kg, dk.nilai_rm, dk.tarikh_kutipan 
-        FROM data_kutipan dk
-        JOIN penghantaran p ON dk.penghantaran_id = p.id
+$sql = "SELECT 
+            u.nama AS nama_pengguna, 
+            p.jajahan_daerah, 
+            kv.kategori, 
+            kv.item_3r AS jenis,  // Gunakan item_3r sebagai jenis
+            kv.berat, 
+            kv.nilai, 
+            p.tarikh_penghantaran AS tarikh_kutipan  // Ambil dari tabel penghantaran
+        FROM kutipan_vendor kv
+        JOIN penghantaran p ON kv.penghantaran_id = p.id
         JOIN users u ON p.user_id = u.id
         WHERE p.vendor_id = ?";
+
 
 $params = [$vendor_id];
 $types = "i";
 
 // Tambah filter kategori jika ada
 if (!empty($kategori_filter)) {
-    $sql .= " AND dk.kategori = ?";
+    $sql .= " AND kv.kategori = ?";
     $types .= "s";
     $params[] = $kategori_filter;
 }
 
 // Tambah filter tarikh jika ada
 if (!empty($tarikh_mula) && !empty($tarikh_akhir)) {
-    $sql .= " AND dk.tarikh_kutipan BETWEEN ? AND ?";
+    $sql .= " AND kv.tarikh_kutipan BETWEEN ? AND ?";
     $types .= "ss";
     $params[] = $tarikh_mula;
     $params[] = $tarikh_akhir;
 }
 
-$sql .= " ORDER BY dk.id DESC"; // Urutan mengikut id terbaru
+$sql .= " ORDER BY kv.id DESC"; // Urutan mengikut id terbaru
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
@@ -115,8 +123,8 @@ $result = $stmt->get_result();
             <td><?= htmlspecialchars($row['jajahan_daerah']) ?></td>
             <td><?= htmlspecialchars($row['kategori']) ?></td>
             <td><?= htmlspecialchars($row['jenis']) ?></td>
-            <td><?= number_format($row['berat_kg'], 2) ?></td>
-            <td>RM <?= number_format($row['nilai_rm'], 2) ?></td>
+            <td><?= number_format($row['berat']) ?></td>
+            <td>RM <?= number_format($row['nilai']) ?></td>
             <td><?= htmlspecialchars($row['tarikh_kutipan']) ?></td>
         </tr>
         <?php } ?>
