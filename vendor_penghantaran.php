@@ -122,7 +122,7 @@ $result = $stmt->get_result();
         <th>Jenis</th>
         <th>Alamat</th>
         <th>Poskod</th>
-        <th>Daerah</th>
+        <th>Jajahan/Daerah</th>
         <th>Negeri</th>
         <th>Tarikh Hantar</th>
         <th>Status</th>
