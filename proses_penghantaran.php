@@ -14,7 +14,7 @@ $kategori = $_POST['kategori'] ?? '';
 $jenis = $_POST['jenis'] ?? '';
 $alamat = $_POST['alamat'] ?? '';
 $poskod = $_POST['poskod'] ?? '';
-$jajahan = $_POST['jajahan'] ?? '';
+$jajahan_daerah = $_POST['jajahan_daerah'] ?? '';
 $negeri = $_POST['negeri'] ?? '';
 $no_telefon = $_POST['no_telefon_untuk_dihubungi'] ?? '';
 $nama_pelajar = $_POST['nama_pelajar'] ?? '';
@@ -23,7 +23,7 @@ $kelas = $_POST['kelas'] ?? '';
 $cadangan_tarikh_kutipan = $_POST['cadangan_tarikh_kutipan'] ?? '';
 
 // Semak input wajib
-if (empty($kategori) || empty($jenis) || empty($alamat) || empty($poskod) || empty($jajahan) || empty($negeri)) {
+if (empty($kategori) || empty($jenis) || empty($alamat) || empty($poskod) || empty($jajahan_daerah) || empty($negeri)) {
     die("❌ Sila lengkapkan semua maklumat wajib.");
 }
 
@@ -65,7 +65,7 @@ $stmt = $conn->prepare("INSERT INTO penghantaran
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
 $stmt->bind_param("isssssssssssss", 
-    $user_id, $peranan, $kategori, $jenis, $alamat, $poskod, $jajahan, $negeri, $no_telefon, $gambar, $nama_pelajar, $nama_sekolah, $kelas, $cadangan_tarikh_kutipan);
+    $user_id, $peranan, $kategori, $jenis, $alamat, $poskod, $jajahan_daerah, $negeri, $no_telefon, $gambar, $nama_pelajar, $nama_sekolah, $kelas, $cadangan_tarikh_kutipan);
 
 if ($stmt->execute()) {
     // ✅ Simpan log aktiviti
