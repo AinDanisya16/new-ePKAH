@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}"
                 title="Mesti ada sekurang-kurangnya 8 aksara, huruf besar, huruf kecil, nombor & simbol"
                 style="width: 100%; padding-right: 40px;">
-            <span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
+            
         </div>
 
         <div id="vendor-fields" style="display:none;">
