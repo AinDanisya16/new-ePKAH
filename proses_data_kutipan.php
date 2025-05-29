@@ -6,28 +6,28 @@ if (!isset($_SESSION['user_id']) || $_SESSION['peranan'] !== 'vendor') {
     die("❌ Akses tidak dibenarkan.");
 }
 
-if (isset($_POST['penghantaran_id']) && isset($_POST['kutipan'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['penghantaran_id'], $_POST['kutipan_vendor'])) {
     $penghantaran_id = intval($_POST['penghantaran_id']);
-    $kutipan = $_POST['kutipan'];
+    $kutipanList = $_POST['kutipan_vendor'];
 
-    foreach ($kutipan as $item) {
+    $stmt = $conn->prepare("INSERT INTO kutipan_vendor (penghantaran_id, kategori, item_3r, berat, nilai) VALUES (?, ?, ?, ?, ?)");
+
+foreach ($_POST['kutipan_vendor'] as $item) {
         $kategori = $conn->real_escape_string($item['kategori']);
+        $item_3r = isset($item['item_3r']) ? $conn->real_escape_string($item['item_3r']) : null;
         $berat = floatval($item['berat']);
         $nilai = floatval($item['nilai']);
-        $jenis = isset($item['item']) ? $conn->real_escape_string($item['item']) : '-';
-        $tarikh_kutipan = date("Y-m-d"); // hari ini
 
-        $sql = "INSERT INTO data_kutipan (penghantaran_id, kategori, jenis, berat_kg, nilai_rm, tarikh_kutipan) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issdds", $penghantaran_id, $kategori, $jenis, $berat, $nilai, $tarikh_kutipan);
+        $stmt->bind_param("issdd", $penghantaran_id, $kategori, $item_3r, $berat, $nilai);
         $stmt->execute();
     }
+    $stmt->close();
 
-    header("Location: laporan_data_kutipan.php");
+// Ganti di proses_data_kutipan.php
+    header("Location: laporan_data_kutipan.php?msg=Berjaya+tambah+kutipan");
+exit();
     exit();
 } else {
-    echo "❌ Data tidak lengkap.";
+    die("❌ Data tidak lengkap.");
 }
 ?>
